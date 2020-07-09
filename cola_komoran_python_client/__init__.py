@@ -51,8 +51,7 @@ def summarize(sentence_list, target, window, verbose, topk, dic_type):
         return summarizer.summarize(sentence_list, topk=topk)
     except ValueError:
         return []
-
-
+    
 def summarize_batch_with_ray(sentence_list_series, with_tqdm=True,
                              target='localhost:50051', window=-1, verbose=False, topk=10,
                              dic_type=DicType.DEFAULT):
@@ -65,6 +64,21 @@ def summarize_batch_with_ray(sentence_list_series, with_tqdm=True,
         return list(tqdm(to_iterator(obj_ids), total=len(obj_ids)))
     else:
         return ray.get(obj_ids)
+    
+    
+def summarize_without_ray(sentence_list, target, window, verbose, topk, dic_type):
+    tokenize = GrpcTokenizer(target, dic_type=dic_type)
+    summarizer = KeywordSummarizer(
+        tokenize = tokenize,
+        window = window,
+        verbose = verbose,
+    )
+    try:
+        return summarizer.summarize(sentence_list, topk=topk)
+    except ValueError:
+        return [] 
+    
+
 
 
 def ray_init(address="auto"):
